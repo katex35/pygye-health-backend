@@ -26,9 +26,14 @@ print("Training scaler...")
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 
-# Train the model
+# Train the model - lightweight for Vercel deployment
 print("Training model...")
-model = RandomForestClassifier(n_estimators=100, random_state=42)
+model = RandomForestClassifier(
+    n_estimators=20,  # Reduced from 100 to 20
+    max_depth=10,     # Limit tree depth
+    random_state=42,
+    n_jobs=1          # Single thread for deployment
+)
 model.fit(X_train_scaled, y_train.values.ravel())
 
 # Save the model and scaler
