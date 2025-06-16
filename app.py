@@ -1,8 +1,14 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from ucimlrepo import fetch_ucirepo
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
 import numpy as np
-import joblib
-import os
+import ssl
+
+# disable SSL verification for development
+ssl._create_default_https_context = ssl._create_unverified_context
 
 app = Flask(__name__)
 CORS(app, resources={
@@ -13,9 +19,22 @@ CORS(app, resources={
     }
 })
 
-# load the pre-trained model and scaler
-model = joblib.load('model.joblib')
-scaler = joblib.load('scaler.joblib')
+# load the data and train the model
+heart_disease = fetch_ucirepo(id=45)
+X = heart_disease.data.features
+y = heart_disease.data.targets
+
+# split the data into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# scale the data
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# train the model
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train_scaled, y_train.values.ravel())
 
 @app.route('/')
 def home():
