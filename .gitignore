@@ -28,5 +28,4 @@ build/
 
 .DS_Store
 .gitignore
-model.joblib
-scaler.joblib
+app_optimized.py

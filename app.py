@@ -1,14 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from ucimlrepo import fetch_ucirepo
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestClassifier
+import joblib
 import numpy as np
-import ssl
-
-# disable SSL verification for development
-ssl._create_default_https_context = ssl._create_unverified_context
 
 app = Flask(__name__)
 CORS(app, resources={
@@ -19,22 +12,11 @@ CORS(app, resources={
     }
 })
 
-# load the data and train the model
-heart_disease = fetch_ucirepo(id=45)
-X = heart_disease.data.features
-y = heart_disease.data.targets
-
-# split the data into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# scale the data
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
-
-# train the model
-model = RandomForestClassifier(n_estimators=100, random_state=42)
-model.fit(X_train_scaled, y_train.values.ravel())
+# Load the saved model and scaler
+print("Loading saved model and scaler...")
+model = joblib.load('model.joblib')
+scaler = joblib.load('scaler.joblib')
+print("Model and scaler loaded successfully!")
 
 @app.route('/')
 def home():
@@ -55,7 +37,6 @@ def predict():
     try:
         data = request.get_json()
         
-        # check if all required fields are present
         required_fields = ['age', 'sex', 'cp', 'trestbps', 'chol', 'fbs', 'restecg', 
                          'thalach', 'exang', 'oldpeak', 'slope', 'ca', 'thal']
         
@@ -66,7 +47,6 @@ def predict():
                     "status": "error"
                 }), 400
 
-        # convert the input data to numpy array
         input_data = np.array([[
             data['age'],
             data['sex'],
@@ -83,10 +63,7 @@ def predict():
             data['thal']
         ]])
 
-        # scale the input data
         input_scaled = scaler.transform(input_data)
-        
-        # predict the class and probability
         prediction = model.predict(input_scaled)
         probability = model.predict_proba(input_scaled)
 
@@ -124,4 +101,4 @@ def get_features():
     })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000) 
+    app.run(host='0.0.0.0', port=8001) 
