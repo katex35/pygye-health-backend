@@ -2,27 +2,19 @@
     "version": 2,
     "builds": [
         {
-            "src": "app_optimized.py",
+            "src": "app.py",
             "use": "@vercel/python"
         }
     ],
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "app_optimized.py"
+            "dest": "app.py"
         }
     ],
     "functions": {
-        "app_optimized.py": {
-            "excludeFiles": [
-                ".next/**",
-                "*.cache/**",
-                "node_modules/**",
-                "public/**",
-                "app/**",
-                "train_model.py",
-                "app.py"
-            ]
+        "app.py": {
+            "excludeFiles": ".next/**\n*.cache/**\nnode_modules/**\npublic/**\napp/**\ntrain_model.py"
         }
     }
 } 
