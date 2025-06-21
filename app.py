@@ -12,24 +12,26 @@ CORS(app, resources={
     }
 })
 
-# Load the saved model and scaler
-print("Loading saved model and scaler...")
+# Load the saved lightweight model and scaler
+print("Loading lightweight model and scaler...")
 model = joblib.load('model.joblib')
 scaler = joblib.load('scaler.joblib')
-print("Model and scaler loaded successfully!")
+print("Lightweight model and scaler loaded successfully!")
 
 @app.route('/')
 def home():
     return jsonify({
-        "message": "works fine!",
-        "status": "success"
+        "message": "Lightweight ML API works fine!",
+        "status": "success",
+        "model_type": "Pure Python RandomForest"
     })
 
 @app.route('/api/health')
 def health_check():
     return jsonify({
         "status": "healthy",
-        "version": "1.0.0"
+        "version": "2.0.0 (Lightweight)",
+        "dependencies": ["Flask", "Flask-Cors", "NumPy", "Joblib"]
     })
 
 @app.route('/api/predict', methods=['POST'])
@@ -70,7 +72,8 @@ def predict():
         return jsonify({
             "prediction": int(prediction[0]),
             "probability": float(probability[0][1]),
-            "status": "success"
+            "status": "success",
+            "model_info": "Lightweight Pure Python RandomForest"
         })
 
     except Exception as e:
@@ -97,9 +100,15 @@ def get_features():
             "ca": "Number of major vessels colored by fluoroscopy (0-3)",
             "thal": "Thalassemia test result (0-3)"
         },
+        "model_details": {
+            "type": "Pure Python RandomForest", 
+            "trees": 20,
+            "max_depth": 10,
+            "features": 13,
+            "size": "Ultra-lightweight"
+        },
         "status": "success"
     })
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
